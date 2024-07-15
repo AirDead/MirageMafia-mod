@@ -8,12 +8,15 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 
 object MessageBus {
-    fun registerListener(channel: Identifier, listener: (PacketByteBuf) -> Unit) {
+    fun registerListener(channel: Identifier, listener: BufferHandler) {
         ClientPlayNetworking.registerGlobalReceiver(channel) { client: MinecraftClient?, handler: ClientPlayNetworkHandler?, buf: PacketByteBuf, sender: PacketSender? ->
             client?.let {
-                listener.invoke(buf)
+                listener.invoke(BufferContext(buf, client))
             }
         }
     }
 
 }
+
+typealias BufferHandler = BufferContext.() -> Unit
+data class BufferContext(val buf: PacketByteBuf, val client: MinecraftClient)
